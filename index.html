@@ -211,23 +211,7 @@
   }
   .scope-head .live{color:var(--teal); display:flex; align-items:center; gap:6px;}
   .scope-head .live .led{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 5px var(--teal);animation:blink 1.8s infinite;}
-  svg.trace-svg{display:block; width:100%; height:120px;}
-  .trace-path{
-    fill:none;
-    stroke:var(--amber-bright);
-    stroke-width:1.6;
-    stroke-linecap:round;
-    filter:drop-shadow(0 0 3px rgba(240,168,94,0.45));
-    stroke-dasharray:900;
-    stroke-dashoffset:900;
-    animation:draw 2.6s ease-out forwards, drift 5s ease-in-out 2.6s infinite;
-  }
-  @keyframes draw{ to{stroke-dashoffset:0;} }
-  @keyframes drift{
-    0%,100%{transform:translateY(0);}
-    50%{transform:translateY(-2px);}
-  }
-  .scope-grid-line{stroke:var(--line); stroke-width:1;}
+
   .scope-readout{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -244,6 +228,7 @@
   }
   .scope-readout .k{font-size:9.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.06em;}
   .scope-readout .v{font-size:13px; color:var(--amber-bright); margin-top:3px;}
+
 
   /* ---------- SECTION SHELL ---------- */
   section{padding:72px 0;}
@@ -512,6 +497,268 @@
     color:var(--text-faint);
     text-align:center;
   }
+
+  /* ---------- BOARD (3D floating SBC, embedded in hero scope card) ---------- */
+  .board-scene{
+    position:relative;
+    height:212px;
+    margin-top:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    perspective:1100px;
+    transform:scale(0.66);
+    transform-origin:top center;
+  }
+  .board-shadow{
+    position:absolute;
+    left:50%;
+    bottom:12px;
+    width:260px;
+    height:36px;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 72%);
+    transform:translateX(-50%);
+    animation:board-shadow-pulse 7s ease-in-out infinite;
+    z-index:0;
+  }
+  @keyframes board-shadow-pulse{
+    0%,100%{ transform:translateX(-50%) scale(1); opacity:0.9; }
+    50%{ transform:translateX(-50%) scale(0.82); opacity:0.55; }
+  }
+
+  .board-float{
+    transform-style:preserve-3d;
+    animation:board-drift 7s ease-in-out infinite;
+    z-index:1;
+  }
+  @keyframes board-drift{
+    0%,100%{ transform:translateY(0) rotateZ(-1deg); }
+    50%{ transform:translateY(-18px) rotateZ(1deg); }
+  }
+
+  .board-tilt{
+    transform-style:preserve-3d;
+    transition:transform .4s cubic-bezier(.2,.7,.3,1);
+    transform:
+      rotateX(calc(20deg + var(--ty, 0) * 1deg))
+      rotateY(calc(-22deg + var(--tx, 0) * 1deg));
+  }
+
+  .board-pcb{
+    position:relative;
+    width:300px;
+    height:190px;
+    transform-style:preserve-3d;
+    background:
+      linear-gradient(135deg, rgba(92,184,172,0.05), rgba(0,0,0,0) 60%),
+      var(--panel);
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px),
+      linear-gradient(135deg, rgba(92,184,172,0.05), rgba(0,0,0,0) 60%);
+    background-size:20px 20px, 20px 20px, 100% 100%;
+    border:1px solid var(--teal-dim);
+    border-radius:8px;
+    box-shadow:
+      0 2px 0 var(--line),
+      0 4px 0 var(--line-soft),
+      0 7px 0 #0d1214,
+      0 22px 40px rgba(0,0,0,0.55);
+  }
+
+  .board-pcb > div{
+    position:absolute;
+    transform-style:preserve-3d;
+  }
+
+  .hole{
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--bg);
+    border:1px solid var(--line-soft);
+    transform:translateZ(4px);
+  }
+  .hole-tl{ top:7px; left:7px; } .hole-tr{ top:7px; right:7px; }
+  .hole-bl{ bottom:7px; left:7px; } .hole-br{ bottom:7px; right:7px; }
+
+  .header-pins{
+    top:14px; left:24px;
+    width:252px; height:9px;
+    background:repeating-linear-gradient(90deg, var(--amber) 0 4px, transparent 4px 8px);
+    opacity:0.85;
+    transform:translateZ(6px);
+    border-radius:1px;
+  }
+
+  .csi-connector{
+    top:26px; left:36px;
+    width:18px; height:9px;
+    background:#d8d6cf;
+    opacity:0.9;
+    border-radius:1px;
+    transform:translateZ(6px);
+  }
+
+  .sd-slot{
+    top:94px; left:-4px;
+    width:11px; height:28px;
+    background:#1c2226;
+    border:1px solid var(--line);
+    border-radius:1px;
+    transform:translateZ(6px);
+  }
+
+  .board-mcu{
+    top:60px; left:96px;
+    width:78px; height:78px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 7px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 7px),
+      #05070a;
+    border:1px solid var(--teal-dim);
+    border-radius:3px;
+    transform:translateZ(26px);
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    transition:box-shadow .25s ease, border-color .25s ease, transform .25s ease;
+    box-shadow:0 0 0 rgba(240,168,94,0);
+  }
+  .board-mcu:hover,
+  .board-mcu:focus-visible,
+  .board-scene.active .board-mcu{
+    border-color:var(--amber-bright);
+    box-shadow:0 0 22px rgba(240,168,94,0.45), inset 0 0 14px rgba(240,168,94,0.15);
+    transform:translateZ(32px);
+  }
+  .board-mcu:focus-visible{ outline:none; }
+  .mcu-label{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:0.08em;
+    color:var(--amber-bright);
+  }
+  .mcu-sub{
+    font-family:var(--font-mono);
+    font-size:7.5px;
+    letter-spacing:0.05em;
+    color:var(--text-faint);
+  }
+
+  .usb-port{
+    right:-4px;
+    width:32px; height:19px;
+    background:linear-gradient(180deg, #c9ccce, #9aa0a3);
+    border-radius:2px;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.2);
+    transform:translateZ(15px);
+  }
+  .usb-1{ top:44px; }
+  .usb-2{ top:68px; }
+
+  .eth-port{
+    right:-4px; top:98px;
+    width:36px; height:26px;
+    background:linear-gradient(180deg, #b98a4e, #8f6636);
+    border-radius:2px;
+    transform:translateZ(15px);
+  }
+
+  .crystal{
+    top:150px; left:70px;
+    width:17px; height:9px;
+    background:linear-gradient(180deg, #b7bcbe, #8b9294);
+    border-radius:1px;
+    transform:translateZ(11px);
+  }
+
+  .cap{
+    width:11px; height:11px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--teal), var(--teal-dim));
+    transform:translateZ(13px);
+  }
+  .cap-1{ top:56px; left:186px; }
+  .cap-2{ top:150px; left:200px; }
+
+  .pwr-led, .act-led{
+    width:5px; height:5px;
+    border-radius:50%;
+    top:172px;
+    transform:translateZ(11px);
+  }
+  .pwr-led{ left:20px; background:var(--danger); box-shadow:0 0 5px var(--danger); }
+  .act-led{ left:32px; background:var(--teal); box-shadow:0 0 5px var(--teal); animation:blink 1.6s infinite; }
+
+  .usb-c{
+    bottom:-4px; left:40px;
+    width:19px; height:8px;
+    background:linear-gradient(180deg, #c9ccce, #9aa0a3);
+    border-radius:2px;
+    transform:translateZ(11px);
+  }
+  .hdmi{
+    bottom:-4px;
+    width:15px; height:8px;
+    background:#141618;
+    border-radius:1px;
+    transform:translateZ(11px);
+  }
+  .hdmi-1{ left:76px; }
+
+  /* MCU tooltip — stays outside the rotated 3D context so it reads flat */
+  .mcu-tip{
+    position:absolute;
+    top:auto;
+    bottom:-6px;
+    right:50%;
+    transform:translateX(50%) translateY(12px) scale(0.96);
+    width:min(230px, 92%);
+    background:var(--panel);
+    border:1px solid var(--teal-dim);
+    border-radius:var(--radius);
+    padding:14px 16px 12px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    box-shadow:0 14px 30px rgba(0,0,0,0.5);
+    z-index:5;
+  }
+  .board-scene.active .mcu-tip{
+    opacity:1;
+    transform:translateX(50%) translateY(0) scale(1);
+    pointer-events:auto;
+  }
+  .mcu-tip-tag{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:0.1em;
+    color:var(--amber-bright);
+    text-transform:uppercase;
+  }
+  .mcu-tip-list{
+    list-style:none;
+    margin-top:10px;
+  }
+  .mcu-tip-list li{
+    position:relative;
+    padding-left:16px;
+    margin-bottom:7px;
+    color:var(--text-dim);
+    font-size:12.5px;
+    font-family:var(--font-mono);
+  }
+  .mcu-tip-list li:last-child{ margin-bottom:0; }
+  .mcu-tip-list li::before{
+    content:"▸";
+    position:absolute;
+    left:0;
+    color:var(--teal);
+    font-size:10.5px;
+  }
 </style>
 </head>
 <body>
@@ -533,7 +780,7 @@
     <div>
       <div class="eyebrow">Embedded Systems Engineer</div>
       <h1 class="title">Firmware for things that <span>can't fail.</span></h1>
-      <p class="role-line">Railway collision-avoidance systems, UAV battery management, bare-metal drivers, and IoT telemetry — built from the register level up.</p>
+      <p class="role-line">Real-time C/C++ firmware for railway signaling, UAV battery management, and EV fast-charging power electronics — from schematic to field deployment.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#projects">View projects →</a>
         <a class="btn btn-ghost" href="#contact">Get in touch</a>
@@ -542,23 +789,56 @@
 
     <div class="scope">
       <div class="scope-head">
-        <span>CH1 · SIGNAL TRACE</span>
+        <span>RIG · SoC RENDER</span>
         <span class="live"><span class="led"></span>LIVE</span>
       </div>
-      <svg class="trace-svg" viewBox="0 0 400 120" preserveAspectRatio="none">
-        <line class="scope-grid-line" x1="0" y1="20" x2="400" y2="20"></line>
-        <line class="scope-grid-line" x1="0" y1="60" x2="400" y2="60"></line>
-        <line class="scope-grid-line" x1="0" y1="100" x2="400" y2="100"></line>
-        <line class="scope-grid-line" x1="80" y1="0" x2="80" y2="120"></line>
-        <line class="scope-grid-line" x1="160" y1="0" x2="160" y2="120"></line>
-        <line class="scope-grid-line" x1="240" y1="0" x2="240" y2="120"></line>
-        <line class="scope-grid-line" x1="320" y1="0" x2="320" y2="120"></line>
-        <path class="trace-path" d="M0,60 L20,60 L30,20 L45,100 L60,60 L100,60 L115,30 L130,90 L145,60 L190,60 L205,15 L220,95 L235,60 L280,60 L295,25 L310,90 L325,60 L400,60"></path>
-      </svg>
+
+      <div class="board-scene" id="boardScene">
+        <div class="board-shadow"></div>
+        <div class="board-float">
+          <div class="board-tilt" id="boardTilt">
+            <div class="board-pcb">
+              <div class="hole hole-tl"></div>
+              <div class="hole hole-tr"></div>
+              <div class="hole hole-bl"></div>
+              <div class="hole hole-br"></div>
+              <div class="header-pins"></div>
+              <div class="csi-connector"></div>
+              <div class="sd-slot"></div>
+              <div class="usb-port usb-1"></div>
+              <div class="usb-port usb-2"></div>
+              <div class="eth-port"></div>
+              <div class="crystal"></div>
+              <div class="cap cap-1"></div>
+              <div class="cap cap-2"></div>
+              <div class="pwr-led"></div>
+              <div class="act-led"></div>
+              <div class="usb-c"></div>
+              <div class="hdmi hdmi-1"></div>
+              <div class="board-mcu" id="boardMcu" tabindex="0" role="button" aria-expanded="false" aria-label="Show core skills">
+                <span class="mcu-label">SoC</span>
+                <span class="mcu-sub">CORE·SKILLS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mcu-tip" id="mcuTip">
+          <span class="mcu-tip-tag">// core.skills</span>
+          <ul class="mcu-tip-list">
+            <li>Embedded C &amp; C++</li>
+            <li>FreeRTOS · Embedded Linux (Yocto)</li>
+            <li>CAN · SPI · I²C · UART · GPIO drivers</li>
+            <li>Circuit design — schematic to bring-up</li>
+            <li>JTAG / ST-LINK · oscilloscope debug</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="scope-readout">
-        <div><div class="k">Uptime</div><div class="v">4.7 yrs</div></div>
-        <div><div class="k">Domains</div><div class="v">Rail · UAV · IoT</div></div>
-        <div><div class="k">Stack</div><div class="v">C / C++ / RTOS</div></div>
+        <div><div class="k">Uptime</div><div class="v">3+ yrs</div></div>
+        <div><div class="k">Domains</div><div class="v">Rail · UAV · EV</div></div>
+        <div><div class="k">Stack</div><div class="v">C / C++ / Linux</div></div>
       </div>
     </div>
   </div>
@@ -572,27 +852,27 @@
     </div>
 
     <div class="log-entry">
-      <div class="log-time">Electrowaves<span class="range">Jan 2026 — Present</span></div>
+      <div class="log-time">Electrowaves<span class="range">6 months · Chandigarh</span></div>
       <div>
         <div class="log-role">Embedded Systems Engineer</div>
         <div class="log-org">Electrowaves Electronics Pvt. Ltd.</div>
         <ul class="log-points">
-          <li>Developing safety-critical embedded firmware for TCAS (KAVACH), implementing real-time control and collision avoidance logic in compliance with Indian Railways standards.</li>
-          <li>Designed and validated low-level device drivers and communication interfaces, ensuring fault-tolerant operation in mission-critical railway environments.</li>
-          <li>Collaborated with systems and verification teams to stabilize core firmware workflows, reducing integration issues across field deployments.</li>
+          <li>Develop safety-critical Embedded C firmware for a TCAS (KAVACH) train collision-avoidance system on ARM Cortex hardware, implementing real-time control logic to meet Indian Railways (RDSO) safety standards within a 10–15 engineer cross-functional team.</li>
+          <li>Design, implement, and test low-level device drivers for CAN, UART, SPI, and GPIO interfaces to support fault-tolerant operation in mission-critical railway control systems.</li>
+          <li>Review and modify existing firmware codebases for feature updates and defect fixes, author design docs and test procedures, and debug firmware using oscilloscopes and JTAG/ST-LINK debuggers ahead of field deployment.</li>
         </ul>
       </div>
     </div>
 
     <div class="log-entry">
-      <div class="log-time">Menthosa<span class="range">Sep 2023 — Nov 2025</span></div>
+      <div class="log-time">Menthosa<span class="range">2+ years · Chandigarh</span></div>
       <div>
         <div class="log-role">Embedded Systems Engineer</div>
         <div class="log-org">Menthosa Solutions Pvt. Ltd.</div>
         <ul class="log-points">
-          <li>Developed firmware for UAV Battery Management Systems (4S–14S Li-ion) and sensor subsystems, implementing real-time fault detection, cell balancing, protection logic, and low-latency data handling.</li>
-          <li>Developed firmware for IoT gateways and drone-tracking systems on ARM platforms, enabling reliable real-time telemetry via cellular connectivity and GNSS.</li>
-          <li>Customized and optimized Embedded Linux device drivers and system builds on ARM platforms to support camera integration and onboard AI vision pipelines.</li>
+          <li>Ported and customized a Yocto-based Embedded Linux build for an ArmSoM RK3576 (Rockchip) platform, implementing Device Tree modifications and a V4L2 driver for the Raspberry Pi Camera v2 — a 1280×720 pipeline at 60 fps for onboard AI vision.</li>
+          <li>Developed Embedded C firmware for UAV Battery Management Systems supporting 4S–14S Li-ion packs, implementing ADC-based fault detection, PWM-driven cell balancing, and protection logic over multi-master I²C.</li>
+          <li>Built firmware for IoT/cellular gateway systems and drone-tracking platforms on ARM hardware, implementing GNSS telemetry with nanosecond-level clock sync and transmission over cellular networks for real-time remote monitoring.</li>
         </ul>
       </div>
     </div>
@@ -609,79 +889,38 @@
     <div class="proj-grid">
       <div class="proj-card">
         <div class="proj-head">
-          <div class="proj-name">UAV Smart Battery — BMS</div>
+          <div class="proj-name">UAV Battery Management System</div>
           <div class="proj-id">4S–14S Li-ion</div>
         </div>
-        <div class="proj-meta">
-          <span><b>Duration</b> May – Aug 2025</span>
-          <span><b>Team</b> 3</span>
+        <ul class="proj-points">
+          <li>Architected scalable BMS firmware supporting 4S–14S Li-ion packs with real-time monitoring and safety-critical protection logic, deployed in ~100 units for 5G lab installations under a Government of India initiative.</li>
+          <li>Implemented fault detection from battery-monitor ADC data and developed passive and active cell-balancing algorithms over multi-master I²C.</li>
+        </ul>
+        <div class="proj-tags"><span class="tag">I2C</span><span class="tag">ADC</span><span class="tag">Protection Logic</span></div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-head">
+          <div class="proj-name">Alternator Battery Charger</div>
+          <div class="proj-id">RAILWAY · 1kW</div>
         </div>
         <ul class="proj-points">
-          <li>Architected a scalable BMS firmware framework in C for STM32, supporting multi-series Li-ion packs from 4S to 14S.</li>
-          <li>Implemented a fault-detection state machine covering over/under-voltage, over/under-temperature, short-circuit, and over-current conditions, triggering hardware-level shutdown or warning indicators.</li>
-          <li>Built real-time embedded control algorithms for passive and active cell balancing using cell voltage differentials from a battery monitor IC.</li>
+          <li>Developed master controller firmware for a 1kW-rated railway alternator battery charger, implementing CAN and BLE application layers for system monitoring and control.</li>
+          <li>Integrated MQTT connectivity for remote monitoring and implemented FOTA updates for field deployment; designed a hardware test jig to validate firmware during integration testing.</li>
         </ul>
-        <div class="proj-tags"><span class="tag">STM32</span><span class="tag">I2C</span><span class="tag">ST-LINK</span></div>
+        <div class="proj-tags"><span class="tag">CAN</span><span class="tag">BLE</span><span class="tag">MQTT</span><span class="tag">FOTA</span></div>
       </div>
 
       <div class="proj-card">
         <div class="proj-head">
-          <div class="proj-name">ToF Sensor Integration</div>
-          <div class="proj-id">MAVLink</div>
-        </div>
-        <div class="proj-meta">
-          <span><b>Duration</b> Feb – May 2025</span>
-          <span><b>Team</b> 2</span>
-        </div>
-        <p class="proj-desc">Extended the MAVLink protocol to support custom payloads for a VL53L7CX time-of-flight sensor, enabling distance data to be transmitted over the existing telemetry stream. Interfaced the sensor with an STM32 over I2C and implemented MAVLink message encoding/decoding for integration with ground control software.</p>
-        <div class="proj-tags"><span class="tag">STM32</span><span class="tag">MAVLink</span><span class="tag">I2C</span></div>
-      </div>
-
-      <div class="proj-card">
-        <div class="proj-head">
-          <div class="proj-name">Drone Tracking System</div>
-          <div class="proj-id">TELEMETRY</div>
-        </div>
-        <div class="proj-meta">
-          <span><b>Duration</b> Sep 2024 – Feb 2025</span>
-          <span><b>Team</b> 2</span>
-        </div>
-        <p class="proj-desc">Developed embedded firmware to acquire real-time motion data from an IMU over I2C/SPI and transmit it to a cloud server using MQTT and HTTPS over a 4G LTE network via the Quectel EC200U module, with efficient data serialization, connection management, and fallback logic for reliable telemetry.</p>
-        <div class="proj-tags"><span class="tag">LTE</span><span class="tag">MQTT</span><span class="tag">GPS</span><span class="tag">IMU</span></div>
-      </div>
-
-      <div class="proj-card">
-        <div class="proj-head">
-          <div class="proj-name">Aerothon — Autonomous UAV</div>
-          <div class="proj-id">BLDC / ESC</div>
-        </div>
-        <div class="proj-meta">
-          <span><b>Duration</b> Mar – Sep 2024</span>
-          <span><b>Team</b> 6</span>
+          <div class="proj-name">ToF Sensor &amp; Multi-Axis Stabilization</div>
+          <div class="proj-id">EKF</div>
         </div>
         <ul class="proj-points">
-          <li>Selected BLDC motors for a UAV designed to carry a 200g payload across a 15-minute flight envelope, balancing thrust-to-weight ratio, power efficiency, and battery characteristics.</li>
-          <li>Served as primary test pilot for manual flight operations, evaluating control responsiveness and stability to guide firmware and hardware iterations.</li>
-          <li>Designed a modular autonomous UAV system incorporating real-time object detection alongside manual and autonomous flight modes.</li>
+          <li>Designed and implemented Time-of-Flight sensor firmware to measure ground distance for a drone altitude system, calibrated for reliable outdoor performance.</li>
+          <li>Developed and tuned an Extended Kalman Filter with closed-loop control for a multi-axis stabilization system.</li>
         </ul>
-        <div class="proj-tags"><span class="tag">Power Electronics</span><span class="tag">PID</span><span class="tag">ESC</span></div>
-      </div>
-
-      <div class="proj-card">
-        <div class="proj-head">
-          <div class="proj-name">UAV Smart Charger</div>
-          <div class="proj-id">ESP32 / mbedTLS</div>
-        </div>
-        <div class="proj-meta">
-          <span><b>Duration</b> Dec 2023 – Mar 2024</span>
-          <span><b>Team</b> 3</span>
-        </div>
-        <ul class="proj-points">
-          <li>Developed firmware for 4- to 14-cell BMS units, optimizing charging algorithms and protection logic for custom battery configurations.</li>
-          <li>Designed and implemented an ESP32-based secure Wi-Fi server for BMS data acquisition, real-time analytics, and web-based visualization.</li>
-          <li>Engineered a server-side solution for real-time charging data visualization, improving operational oversight across connected devices.</li>
-        </ul>
-        <div class="proj-tags"><span class="tag">ESP32</span><span class="tag">I2C</span><span class="tag">mbedTLS</span><span class="tag">HTTPS</span></div>
+        <div class="proj-tags"><span class="tag">ToF</span><span class="tag">Kalman Filter</span><span class="tag">Closed-Loop</span></div>
       </div>
 
       <div class="proj-card">
@@ -689,15 +928,23 @@
           <div class="proj-name">LoRaWAN Gateway</div>
           <div class="proj-id">LTE BACKHAUL</div>
         </div>
-        <div class="proj-meta">
-          <span><b>Duration</b> Jun – Nov 2023</span>
-          <span><b>Team</b> 3</span>
+        <ul class="proj-points">
+          <li>Engineered an IoT gateway enabling long-range LoRaWAN backhaul over LTE with integrated GPS and cellular modules.</li>
+          <li>Designed hardware interfaces directly from schematics — power regulation, ESD protection, and logic-level translation — for robust interoperability across subsystem boundaries.</li>
+        </ul>
+        <div class="proj-tags"><span class="tag">LoRaWAN</span><span class="tag">LTE</span><span class="tag">GPS</span></div>
+      </div>
+
+      <div class="proj-card">
+        <div class="proj-head">
+          <div class="proj-name">Arc Fault Detection Device</div>
+          <div class="proj-id">CAN / BLE</div>
         </div>
         <ul class="proj-points">
-          <li>Engineered a high-altitude IoT gateway by customizing firmware on a Quectel EC200U LTE module integrated with a LoRaWAN module, optimizing for extended range and reliable backhaul from remote nodes under challenging environmental conditions.</li>
-          <li>Designed the complete hardware interface circuit — power regulation, ESD protection, and logic-level translation — ensuring electrical integrity and interoperability between the EC200U, LoRaWAN module, GPS, and STM32 under high-altitude thermal and EMI constraints.</li>
+          <li>Developed firmware for a standalone arc fault detection device, implementing CAN and BLE communication for status reporting and control.</li>
+          <li>Implemented fault detection logic to identify arc fault conditions and trigger a protective response.</li>
         </ul>
-        <div class="proj-tags"><span class="tag">LoRaWAN</span><span class="tag">LTE</span><span class="tag">UBX</span></div>
+        <div class="proj-tags"><span class="tag">CAN</span><span class="tag">BLE</span><span class="tag">Fault Detection</span></div>
       </div>
 
       <div class="proj-card">
@@ -705,17 +952,17 @@
           <div class="proj-name">Bare-Metal Ethernet Driver</div>
           <div class="proj-id">HERCULES</div>
         </div>
-        <p class="proj-desc">Designed and implemented a bare-metal Ethernet driver from scratch for Hercules-based platforms, enabling reliable packet transmission and reception without vendor stacks — including MAC initialization, DMA descriptor handling, interrupt servicing, and buffer management for deterministic, low-latency communication.</p>
+        <p class="proj-desc">Designed and implemented a bare-metal Ethernet PHY-to-MAC integration layer from scratch for Hercules-based microcontrollers, enabling reliable packet TX/RX without vendor stacks — MAC init, DMA descriptor handling, interrupt servicing, and buffer management for deterministic, low-latency communication.</p>
         <div class="proj-tags"><span class="tag">C</span><span class="tag">DMA</span><span class="tag">Bare-metal</span></div>
       </div>
 
       <div class="proj-card">
         <div class="proj-head">
-          <div class="proj-name">Indoor Mapping Using Drone</div>
-          <div class="proj-id">GPS-DENIED</div>
+          <div class="proj-name">30kW DC Fast-Charging Power Module</div>
+          <div class="proj-id">EV INFRA</div>
         </div>
-        <p class="proj-desc">Built a system for mapping GPS-denied environments using onboard cameras, ultrasonic sensors, and an IMU on a Raspberry Pi — implementing real-time obstacle detection, path planning, and map generation without reliance on GPS.</p>
-        <div class="proj-tags"><span class="tag">IMU</span><span class="tag">Path Planning</span><span class="tag">Raspberry Pi</span></div>
+        <p class="proj-desc">Developed firmware for a 30kW DC fast-charging power conversion module used in electric vehicle charging infrastructure.</p>
+        <div class="proj-tags"><span class="tag">Power Electronics</span><span class="tag">EV Charging</span></div>
       </div>
     </div>
   </div>
@@ -731,33 +978,41 @@
     <div class="datasheet">
       <div class="ds-row">
         <div class="ds-label">Languages</div>
-        <div class="ds-value"><span class="chip">C</span><span class="chip">C++</span><span class="chip">Python</span></div>
+        <div class="ds-value"><span class="chip">Embedded C</span><span class="chip">C++</span><span class="chip">Python</span><span class="chip">Bash/Shell</span></div>
       </div>
       <div class="ds-row">
-        <div class="ds-label">Platforms</div>
-        <div class="ds-value"><span class="chip">STM32</span><span class="chip">ARM Cortex</span><span class="chip">AVR</span><span class="chip">Tiva</span><span class="chip">Hercules</span></div>
+        <div class="ds-label">OS &amp; Build Systems</div>
+        <div class="ds-value"><span class="chip">Yocto</span><span class="chip">Device Tree</span><span class="chip">V4L2</span><span class="chip">Embedded Linux</span><span class="chip">FreeRTOS</span><span class="chip">Bare-Metal</span><span class="chip">GNU Make</span><span class="chip">CMake</span></div>
       </div>
       <div class="ds-row">
-        <div class="ds-label">Protocols</div>
-        <div class="ds-value"><span class="chip">I2C</span><span class="chip">SPI</span><span class="chip">UART</span><span class="chip">CAN</span><span class="chip">Ethernet</span><span class="chip">LoRaWAN</span><span class="chip">MQTT</span><span class="chip">MAVLink</span><span class="chip">Modbus</span><span class="chip">BLE</span><span class="chip">Wi-Fi</span><span class="chip">NMEA</span><span class="chip">UBX</span><span class="chip">RS-485</span><span class="chip">RS-422</span></div>
+        <div class="ds-label">Embedded Platforms</div>
+        <div class="ds-value"><span class="chip">ArmSoM (RK3576)</span><span class="chip">STM32</span><span class="chip">ARM Cortex</span><span class="chip">AVR</span><span class="chip">Tiva</span><span class="chip">Hercules</span></div>
       </div>
       <div class="ds-row">
-        <div class="ds-label">OS &amp; Runtime</div>
-        <div class="ds-value"><span class="chip">FreeRTOS</span><span class="chip">Bare-metal</span></div>
+        <div class="ds-label">Hardware Interfaces</div>
+        <div class="ds-value"><span class="chip">Flash</span><span class="chip">CAN</span><span class="chip">UART</span><span class="chip">SPI</span><span class="chip">I²C</span><span class="chip">GPIO</span><span class="chip">PWM</span><span class="chip">ADC</span><span class="chip">MIPI CSI-2</span></div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-label">Comm Protocols</div>
+        <div class="ds-value"><span class="chip">Ethernet</span><span class="chip">LoRaWAN</span><span class="chip">MQTT</span><span class="chip">MAVLink</span><span class="chip">Modbus</span><span class="chip">BLE</span><span class="chip">Wi-Fi</span><span class="chip">NMEA</span><span class="chip">UBX</span><span class="chip">RS-485</span><span class="chip">RS-422</span></div>
       </div>
       <div class="ds-row">
         <div class="ds-label">Hardware &amp; Power</div>
-        <div class="ds-value"><span class="chip">Circuit Design</span><span class="chip">Power Electronics</span><span class="chip">BMS</span></div>
+        <div class="ds-value"><span class="chip">Circuit Design</span><span class="chip">Reading Schematics</span><span class="chip">Altium Designer</span><span class="chip">Power Electronics</span><span class="chip">Power Rail / Regulation</span><span class="chip">BMS</span><span class="chip">Arc Fault Detection</span><span class="chip">EV DC Fast-Charging</span><span class="chip">1/3-Phase Inverters</span></div>
       </div>
       <div class="ds-row">
         <div class="ds-label">Debug &amp; Tools</div>
-        <div class="ds-value"><span class="chip">ST-LINK</span><span class="chip">JTAG</span><span class="chip">Oscilloscope</span><span class="chip">Logic Analyzer</span><span class="chip">KiCad</span></div>
+        <div class="ds-value"><span class="chip">KiCad</span><span class="chip">ST-LINK</span><span class="chip">JTAG</span><span class="chip">Oscilloscope</span><span class="chip">Logic Analyzer</span></div>
+      </div>
+      <div class="ds-row">
+        <div class="ds-label">Practices</div>
+        <div class="ds-value"><span class="chip">Code Review</span><span class="chip">Requirements Definition</span><span class="chip">Technical Documentation</span><span class="chip">Firmware Test &amp; Validation</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<section id="education" style="display:none;">
+<section id="education">
   <div class="wrap">
     <div class="section-head">
       <span class="section-tag">EDU</span>
@@ -768,7 +1023,6 @@
         <div class="edu-name">University Institute of Engineering and Technology</div>
         <div class="edu-sub">B.E., Electronics &amp; Communication Engineering</div>
       </div>
-      <div class="edu-year">2022 — 2026</div>
     </div>
   </div>
 </section>
@@ -796,6 +1050,62 @@
     <div class="footer-note">// placeholders above — swap in your real handles</div>
   </div>
 </footer>
+
+<script>
+(function(){
+  var scene = document.getElementById('boardScene');
+  var tilt  = document.getElementById('boardTilt');
+  var mcu   = document.getElementById('boardMcu');
+  if(!scene || !tilt || !mcu) return;
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Pointer-driven tilt (desktop only, skipped if reduced motion is preferred)
+  if(!reduceMotion && window.matchMedia('(hover: hover)').matches){
+    scene.addEventListener('mousemove', function(e){
+      var r = scene.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width;   // 0..1
+      var py = (e.clientY - r.top) / r.height;   // 0..1
+      var tx = (px - 0.5) * 16;  // -8..8
+      var ty = (py - 0.5) * -16; // -8..8
+      tilt.style.setProperty('--tx', tx.toFixed(2));
+      tilt.style.setProperty('--ty', ty.toFixed(2));
+    });
+    scene.addEventListener('mouseleave', function(){
+      tilt.style.setProperty('--tx', 0);
+      tilt.style.setProperty('--ty', 0);
+    });
+  }
+
+  // Accessible show/hide of the skills tooltip: hover, focus, click/tap
+  function openTip(){
+    scene.classList.add('active');
+    mcu.setAttribute('aria-expanded', 'true');
+  }
+  function closeTip(){
+    scene.classList.remove('active');
+    mcu.setAttribute('aria-expanded', 'false');
+  }
+  function toggleTip(){
+    if(scene.classList.contains('active')) closeTip(); else openTip();
+  }
+
+  mcu.addEventListener('mouseenter', openTip);
+  mcu.addEventListener('mouseleave', closeTip);
+  mcu.addEventListener('focus', openTip);
+  mcu.addEventListener('blur', closeTip);
+  mcu.addEventListener('click', function(e){ e.stopPropagation(); toggleTip(); });
+  mcu.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      toggleTip();
+    }
+  });
+  document.addEventListener('click', function(e){
+    if(!scene.contains(e.target)) closeTip();
+  });
+})();
+</script>
 
 </body>
 </html>
